@@ -5,6 +5,7 @@ A high-performance file writing utility for Go applications with support for con
 [![Go Report Card](https://goreportcard.com/badge/github.com/JuniorVieira99/jr_writer)](https://goreportcard.com/report/github.com/JuniorVieira99/jr_writer)
 [![GoDoc](https://godoc.org/github.com/JuniorVieira99/jr_writer?status.svg)](https://pkg.go.dev/github.com/JuniorVieira99/jr_writer)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Writer Component CI/CD](https://github.com/JuniorVieira99/jr_writer/actions/workflows/workflow_1_go.yml/badge.svg)](https://github.com/JuniorVieira99/jr_writer/actions/workflows/workflow_1_go.yml)
 
 ## Table of Contents
 
