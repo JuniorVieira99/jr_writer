@@ -37,11 +37,13 @@ A high-performance file writing utility for Go applications with support for con
 - **Detailed Results**: Get comprehensive statistics about writing operations
 - **Batch Processing**: Automatic batch processing for large file sets
 - **Thread Safety**: Safe for concurrent use with goroutines
+- **Extensive Documentation**: All usable methods are documented for easy reference
+- **Default Writer**: Use the default writer for quick operations
 
 ## Installation
 
 ```bash
-go get github.com/yourusername/writer_comp
+go get github.com/JuniorVieira99/jr_writer
 ```
 
 ## Quick Start
@@ -188,6 +190,42 @@ The core component that handles writing operations.
 | ctx       | `context.Context` | Context for cancellation                         |
 | mu        | `sync.Mutex`   | Mutex for context                                |
 
+#### Dwriter
+
+A default writer instance for simple operations. For quick operations, use `Dwriter` with the default settings:
+
+- Use `GetDefaultWriter` to get the default writer.
+- Use `AddFiles` to add files to the default writer and execute write operations.
+- Use `SetMessage` to set the message to write to files.
+- Use any of the set methods to configure
+- Then, `write` to write to all files with a specified number of workers.
+
+Default values:
+
+| Field     | Value          |
+|-----------|----------------|
+| files     | Empty slice []*os.File         |
+| mode      | AppendMode = 'a'   |
+| maxPool   | uint64(runtime.NumCPU() * 4)            |
+| retries   | 2              |
+| backoff   | 100            |
+| message   | "Add text to write"             |
+
+Example:
+
+```go
+// Get default writer
+writer := writer.GetDefaultWriter()
+// Add files
+writer.AddFiles(files)
+// Set message
+writer.SetMessage("Hello, World!")
+// Write to all files with 4 workers
+results, err := writer.Write(4)
+// Check Results
+results.Print()
+```
+
 #### Constructor Methods
 
 - `NewWriter(files, mode, message, maxPool, retries, backoff)`: Create a new Writer
@@ -277,6 +315,19 @@ Contains statistics about writing operations.
 
 - `NewResults()`: Create a new Results instance
 - `Print()` : Print the results to stdout
+    Example Output:
+
+    ```shell
+    Total: 2
+    Success: 1
+    Failure: 1
+    Success Rate: 0.500000
+    Failure Rate: 0.500000
+    Info:
+    filename_1: completed
+    filename_2: error
+    ```
+
 - `GetStringRepresentation()`: Get the results as a string
 
 #### Logger Methods

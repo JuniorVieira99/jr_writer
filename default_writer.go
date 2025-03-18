@@ -21,3 +21,8 @@ var (
 		&emptyFileSlice, &modeA, &message, maxPool, 2, 100,
 	)
 )
+
+// GetDefaultWriter returns the default Writer instance.
+func GetDefaultWriter() *Writer {
+	return Dwriter
+}

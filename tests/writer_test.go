@@ -3,6 +3,7 @@ package tests
 import (
 	"context"
 	"os"
+	"strings"
 	"testing"
 	"time"
 	writer "writercomp"
@@ -444,4 +445,21 @@ func TestDWriter(t *testing.T) {
 	if err != nil {
 		t.Errorf("CloseAllConns returned error: %v", err)
 	}
+}
+
+func TestResultPrint(t *testing.T) {
+	results := writer.NewResults()
+	results.Total = 2
+	results.Success = 1
+	results.Failure = 1
+	results.SuccessRate = 0.5
+	results.FailureRate = 0.5
+	results.Info["filename_1"] = "completed"
+	results.Info["filename_2"] = "error"
+	results.Print()
+
+	if !strings.Contains(results.GetStringRepresentation(), "Total: 2") {
+		t.Errorf("Expected Total to be 2, got %d", results.Total)
+	}
+	results.GetStringRepresentation()
 }
