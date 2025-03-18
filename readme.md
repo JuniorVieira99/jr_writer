@@ -42,7 +42,7 @@ A high-performance file writing utility for Go applications with support for con
 ## Installation
 
 ```bash
-go get github.com/yourusername/writer_comp
+go get github.com/JuniorVieira99/jr_writer
 ```
 
 ## Quick Start
