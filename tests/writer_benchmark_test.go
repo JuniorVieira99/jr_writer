@@ -296,40 +296,40 @@ func TestNoRetriesManyFilesBenchmark(t *testing.T) {
 }
 
 func TestBatching1500(t *testing.T) {
-	myWriter, myFiles := setupWriter(1500)
+    myWriter, myFiles := setupWriter(1500)
 
-	err := myWriter.SetRetries(0)
-	if err != nil {
-		t.Errorf("Error setting retries: %v", err)
-	}
-	err = myWriter.SetMaxPool(150)
-	if err != nil {
-		t.Errorf("Error setting max pool: %v", err)
-	}
+    err := myWriter.SetRetries(0)
+    if err != nil {
+        t.Errorf("Error setting retries: %v", err)
+    }
+    err = myWriter.SetMaxPool(1500)
+    if err != nil {
+        t.Errorf("Error setting max pool: %v", err)
+    }
 
-	//Start Timer
-	start := time.Now()
-	results, err := myWriter.Write(4)
-	if err != nil {
-		t.Errorf("Write failed: %v", err)
-	}
-	elapsed := time.Since(start)
+    //Start Timer
+    start := time.Now()
+    results, err := myWriter.Write(1500)
+    if err != nil {
+        t.Errorf("Write failed: %v", err)
+    }
+    elapsed := time.Since(start)
 
-	// Close connections first, before any cleanup
-	err = myWriter.CloseAllConns()
-	if err != nil {
-		t.Errorf("Error closing connections: %v", err)
-	}
-	cleanupFiles(myFiles)
+    // Close connections first, before any cleanup
+    err = myWriter.CloseAllConns()
+    if err != nil {
+        t.Errorf("Error closing connections: %v", err)
+    }
+    cleanupFiles(myFiles)
 
-	if err != nil {
-		t.Errorf("Write failed: %v", err)
-	}
-	if results.Success != 1500 {
-		t.Errorf("Expected 1500 successes, got %d", results.Success)
-	}
+    if err != nil {
+        t.Errorf("Write failed: %v", err)
+    }
+    if results.Success != 1500 {
+        t.Errorf("Expected 1500 successes, got %d", results.Success)
+    }
 
-	t.Logf("Elapsed time: %.3fs", elapsed.Seconds())
+    t.Logf("Elapsed time: %.3fs", elapsed.Seconds())
 }
 
 func TestBatching3000(t *testing.T) {
