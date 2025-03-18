@@ -40,7 +40,10 @@ func TestNewWriter(t *testing.T) {
 		t.Error("NewWriter returned nil")
 	}
 
-	myWriter.CloseAllConns()
+	err := myWriter.CloseAllConns()
+	if err != nil {
+		t.Errorf("CloseAllConns returned error: %v", err)
+	}
 }
 
 func TestNewWriterFromMap(t *testing.T) {
@@ -70,7 +73,10 @@ func TestNewWriterFromMap(t *testing.T) {
 	if myWriter.GetMaxPool() != 10 {
 		t.Errorf("Expected maxPool to be 10, got %d", myWriter.GetMaxPool())
 	}
-	myWriter.CloseAllConns()
+	err = myWriter.CloseAllConns()
+	if err != nil {
+		t.Errorf("CloseAllConns returned error: %v", err)
+	}
 }
 
 // Test Mode creation
@@ -111,7 +117,10 @@ func TestNewWriterWithValues(t *testing.T) {
 	if myWriter.GetBackoff() != 100 {
 		t.Errorf("Expected backoff to be 100, got %d", myWriter.GetBackoff())
 	}
-	myWriter.CloseAllConns()
+	err := myWriter.CloseAllConns()
+	if err != nil {
+		t.Errorf("CloseAllConns returned error: %v", err)
+	}
 }
 
 // Test WriterConfig creation
@@ -129,6 +138,15 @@ func TestNewWriterFromStruct(t *testing.T) {
 	}
 
 	myWriter, err := writer.NewWriterFromStruct(&config)
+	if err != nil {
+		t.Errorf("NewWriterFromStruct returned error: %v", err)
+	}
+
+	err = myWriter.CloseAllConns()
+	if err != nil {
+		t.Errorf("CloseAllConns returned error: %v", err)
+	}
+
 	if err != nil {
 		t.Errorf("NewWriterFromStruct returned error: %v", err)
 	}
@@ -155,7 +173,6 @@ func TestNewWriterFromStruct(t *testing.T) {
 	if myWriter.GetBackoff() != 100 {
 		t.Errorf("Expected backoff to be 100, got %d", myWriter.GetBackoff())
 	}
-	myWriter.CloseAllConns()
 }
 
 // Test Writer SetXXX methods
@@ -216,7 +233,10 @@ func TestWriterSetters(t *testing.T) {
 	if myWriter.GetMaxPool() != 20 {
 		t.Errorf("Expected max pool to be 20, got %d", myWriter.GetMaxPool())
 	}
-	myWriter.CloseAllConns()
+	err = myWriter.CloseAllConns()
+	if err != nil {
+		t.Errorf("CloseAllConns returned error: %v", err)
+	}
 }
 
 // Test checking connection pool
@@ -239,7 +259,10 @@ func TestConnectionPool(t *testing.T) {
 	if myWriter.CheckConnStatus(file1) {
 		t.Error("CheckConnStatus returned true after closing, expected false")
 	}
-	myWriter.CloseAllConns()
+	err = myWriter.CloseAllConns()
+	if err != nil {
+		t.Errorf("CloseAllConns returned error: %v", err)
+	}
 }
 
 // Test basic writing functionality
@@ -283,7 +306,10 @@ func TestWrite(t *testing.T) {
 	if string(content) != message {
 		t.Errorf("Expected content '%s', got '%s'", message, string(content))
 	}
-	myWriter.CloseAllConns()
+	err = myWriter.CloseAllConns()
+	if err != nil {
+		t.Errorf("CloseAllConns returned error: %v", err)
+	}
 }
 
 // Test writing with timeout
@@ -300,11 +326,15 @@ func TestWriteWithTimeout(t *testing.T) {
 	}
 	if results == nil {
 		t.Error("WriteWithTimeout returned nil results")
+		return
 	}
-	if results.Success != 1 {
+	if results.Success != 1 && results != nil {
 		t.Errorf("Expected 1 successful write, got %d", results.Success)
 	}
-	myWriter.CloseAllConns()
+	err = myWriter.CloseAllConns()
+	if err != nil {
+		t.Errorf("CloseAllConns returned error: %v", err)
+	}
 }
 
 // Test writing with cancellation
@@ -328,7 +358,10 @@ func TestWriteWithCancel(t *testing.T) {
 		cancel() // Cancel the operation
 		t.Log("Write operation canceled")
 	}
-	myWriter.CloseAllConns()
+	err := myWriter.CloseAllConns()
+	if err != nil {
+		t.Errorf("CloseAllConns returned error: %v", err)
+	}
 }
 
 // Test context handling
@@ -349,7 +382,10 @@ func TestContextHandling(t *testing.T) {
 	if err == nil {
 		t.Error("Expected error due to canceled context, got nil")
 	}
-	myWriter.CloseAllConns()
+	err = myWriter.CloseAllConns()
+	if err != nil {
+		t.Errorf("CloseAllConns returned error: %v", err)
+	}
 }
 
 // Test Results creation
@@ -382,9 +418,12 @@ func TestNewResults(t *testing.T) {
 }
 
 func TestDWriter(t *testing.T) {
-	writer.Dwriter.FactoryReset()
+	err := writer.Dwriter.FactoryReset()
+	if err != nil {
+		t.Errorf("FactoryReset returned error: %v", err)
+	}
 
-	err := writer.Dwriter.AddFiles(files)
+	err = writer.Dwriter.AddFiles(files)
 	if err != nil {
 		t.Errorf("AddFiles returned error: %v", err)
 	}
@@ -401,5 +440,8 @@ func TestDWriter(t *testing.T) {
 		t.Errorf("Expected 1 successful write, got %d", results.Success)
 	}
 
-	writer.Dwriter.CloseAllConns()
+	err = writer.Dwriter.CloseAllConns()
+	if err != nil {
+		t.Errorf("CloseAllConns returned error: %v", err)
+	}
 }

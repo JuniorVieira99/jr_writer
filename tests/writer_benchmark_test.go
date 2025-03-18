@@ -58,9 +58,11 @@ func TestSimpleBenchmark(t *testing.T) {
 
 	if err != nil {
 		t.Errorf("Write returned error: %v", err)
+		return
 	}
 	if result == nil {
 		t.Error("Write returned nil results")
+		return
 	}
 	if result.Success != 2 {
 		t.Errorf("Expected 10 successful writes, got %d", result.Success)
@@ -79,7 +81,10 @@ func TestSimpleBenchmark(t *testing.T) {
 	// Calculate elapsed time
 	elapsedTime := time.Since(startTime)
 	t.Logf("Elapsed time: %.3fs for 2 writes", elapsedTime.Seconds())
-	myWriter.CloseAllConns()
+	err = myWriter.CloseAllConns()
+	if err != nil {
+		t.Errorf("Error closing connections: %v", err)
+	}
 	t.Log("Closed all connections")
 }
 
@@ -125,7 +130,10 @@ func Test25FilesBenchmark(t *testing.T) {
 	}
 
 	t.Logf("Elapsed time: %.3fs for 25 writes", elapsedTime.Seconds())
-	myWriter.CloseAllConns()
+	err = myWriter.CloseAllConns()
+	if err != nil {
+		t.Errorf("Error closing connections: %v", err)
+	}
 	t.Log("Closed all connections")
 }
 
@@ -150,13 +158,19 @@ func TestManyFilesBenchmark(t *testing.T) {
 
 			// Do the work
 			result, err := myWriter.Write(fileSize)
+			if err != nil {
+				t.Errorf("Write returned error: %v", err)
+			}
 
 			// Calculate elapsed time
 			elapsedTime := time.Since(startTime)
 			totalTime += elapsedTime
 
 			// Close connections first, before any cleanup
-			myWriter.CloseAllConns()
+			err = myWriter.CloseAllConns()
+			if err != nil {
+				t.Errorf("Error closing connections: %v", err)
+			}
 
 			// Now cleanup files
 			cleanupFiles(myFiles)
@@ -186,7 +200,10 @@ func TestManyFilesBenchmark(t *testing.T) {
 				t.Errorf("Error slice: %v", result.ErrSlice)
 			}
 			t.Logf("Elapsed time: %.3fs for %d writes", elapsedTime.Seconds(), fileSize)
-			myWriter.CloseAllConns()
+			err = myWriter.CloseAllConns()
+			if err != nil {
+				t.Errorf("Error closing connections: %v", err)
+			}
 			t.Log("Closed all connections")
 		})
 	}
@@ -210,22 +227,33 @@ func TestNoRetriesManyFilesBenchmark(t *testing.T) {
 			// Setup Writer
 			myWriter, myFiles := setupWriter(fileSize)
 			// Setup retries
-			myWriter.SetRetries(0)
+			err := myWriter.SetRetries(0)
+			if err != nil {
+				t.Errorf("Error setting retries: %v", err)
+			}
 			// Increase pool size to match file count
-			myWriter.SetMaxPool(uint64(fileSize))
-
+			err = myWriter.SetMaxPool(uint64(fileSize))
+			if err != nil {
+				t.Errorf("Error setting max pool: %v", err)
+			}
 			// Set timer
 			startTime := time.Now()
 
 			// Do the work
 			result, err := myWriter.Write(fileSize)
+			if err != nil {
+				t.Errorf("Write returned error: %v", err)
+			}
 
 			// Calculate elapsed time
 			elapsedTime := time.Since(startTime)
 			totalTime += elapsedTime
 
 			// Close connections first, before any cleanup
-			myWriter.CloseAllConns()
+			err = myWriter.CloseAllConns()
+			if err != nil {
+				t.Errorf("Error closing connections: %v", err)
+			}
 
 			// Now cleanup files
 			cleanupFiles(myFiles)
@@ -269,15 +297,29 @@ func TestNoRetriesManyFilesBenchmark(t *testing.T) {
 
 func TestBatching1500(t *testing.T) {
 	myWriter, myFiles := setupWriter(1500)
-	myWriter.SetRetries(0)
-	myWriter.SetMaxPool(150)
+
+	err := myWriter.SetRetries(0)
+	if err != nil {
+		t.Errorf("Error setting retries: %v", err)
+	}
+	err = myWriter.SetMaxPool(150)
+	if err != nil {
+		t.Errorf("Error setting max pool: %v", err)
+	}
+
 	//Start Timer
 	start := time.Now()
 	results, err := myWriter.Write(4)
+	if err != nil {
+		t.Errorf("Write failed: %v", err)
+	}
 	elapsed := time.Since(start)
 
 	// Close connections first, before any cleanup
-	myWriter.CloseAllConns()
+	err = myWriter.CloseAllConns()
+	if err != nil {
+		t.Errorf("Error closing connections: %v", err)
+	}
 	cleanupFiles(myFiles)
 
 	if err != nil {
@@ -292,15 +334,29 @@ func TestBatching1500(t *testing.T) {
 
 func TestBatching3000(t *testing.T) {
 	myWriter, myFiles := setupWriter(3000)
-	myWriter.SetRetries(0)
-	myWriter.SetMaxPool(1000)
+
+	err := myWriter.SetRetries(0)
+	if err != nil {
+		t.Errorf("Error setting retries: %v", err)
+	}
+	err = myWriter.SetMaxPool(1000)
+	if err != nil {
+		t.Errorf("Error setting max pool: %v", err)
+	}
+
 	//Start Timer
 	start := time.Now()
 	results, err := myWriter.Write(4)
+	if err != nil {
+		t.Errorf("Write failed: %v", err)
+	}
 	elapsed := time.Since(start)
 
 	// Close connections first, before any cleanup
-	myWriter.CloseAllConns()
+	err = myWriter.CloseAllConns()
+	if err != nil {
+		t.Errorf("Error closing connections: %v", err)
+	}
 	cleanupFiles(myFiles)
 
 	if err != nil {
@@ -310,21 +366,33 @@ func TestBatching3000(t *testing.T) {
 		t.Errorf("Expected 1500 successes, got %d", results.Success)
 	}
 	t.Logf("Elapsed time: %.3fs", elapsed.Seconds())
-	myWriter.CloseAllConns()
-	t.Log("Closed all connections")
 }
 
 func TestBatching5000(t *testing.T) {
 	myWriter, myFiles := setupWriter(5000)
-	myWriter.SetRetries(0)
-	myWriter.SetMaxPool(1500)
+
+	err := myWriter.SetRetries(0)
+	if err != nil {
+		t.Errorf("Error setting retries: %v", err)
+	}
+	err = myWriter.SetMaxPool(1500)
+	if err != nil {
+		t.Errorf("Error setting max pool: %v", err)
+	}
+
 	//Start Timer
 	start := time.Now()
 	results, err := myWriter.Write(4)
+	if err != nil {
+		t.Errorf("Write failed: %v", err)
+	}
 	elapsed := time.Since(start)
 
 	// Close connections first, before any cleanup
-	myWriter.CloseAllConns()
+	err = myWriter.CloseAllConns()
+	if err != nil {
+		t.Errorf("Error closing connections: %v", err)
+	}
 	cleanupFiles(myFiles)
 
 	if err != nil {
@@ -334,8 +402,6 @@ func TestBatching5000(t *testing.T) {
 		t.Errorf("Expected 1500 successes, got %d", results.Success)
 	}
 	t.Logf("Elapsed time: %.3fs", elapsed.Seconds())
-	myWriter.CloseAllConns()
-	t.Log("Closed all connections")
 }
 
 func BenchmarkWriter(b *testing.B) {
@@ -352,8 +418,14 @@ func BenchmarkWriter(b *testing.B) {
 			myWriter, myFiles := setupWriter(2)
 			// Do the work
 			result, err := myWriter.Write(2)
+			if err != nil {
+				b.Errorf("Write returned error: %v", err)
+			}
 			// Cleanup
-			myWriter.CloseAllConns()
+			err = myWriter.CloseAllConns()
+			if err != nil {
+				b.Errorf("Error closing connections: %v", err)
+			}
 			cleanupFiles(myFiles)
 
 			if err != nil {
@@ -391,9 +463,29 @@ func BenchmarkManyFiles(b *testing.B) {
 			for i := 0; i < b.N; i++ {
 				w, files := setupWriter(size)
 				b.StartTimer()
-				w.Write(runtime.NumCPU())
+
+				result, err := w.Write(runtime.NumCPU())
+				if err != nil {
+					b.Errorf("Write returned error: %v", err)
+				}
+
 				b.StopTimer()
-				w.CloseAllConns()
+				err = w.CloseAllConns()
+				if err != nil {
+					b.Errorf("Error closing connections: %v", err)
+				}
+
+				if result == nil {
+					b.Error("Write returned nil results")
+					continue
+				}
+				if result.Failure != 0 {
+					b.Errorf("Expected 0 failures, got %d", result.Failure)
+				}
+				if result.SuccessRate != 1.0 {
+					b.Errorf("Expected success rate of 1.0, got %f", result.SuccessRate)
+				}
+
 				cleanupFiles(files)
 				b.Log("Closed all connections")
 			}
@@ -407,15 +499,37 @@ func TestDwriterManyFiles(t *testing.T) {
 	for _, size := range sizes {
 		start := time.Now()
 		t.Run(fmt.Sprintf("Files%d", size), func(t *testing.T) {
+			// Make files
 			files := makeFiles(size)
-			writer.Dwriter.AddFiles(files)
-			writer.Dwriter.Write(runtime.NumCPU())
-			writer.Dwriter.CloseAllConns()
+			// Add files
+			errFiles := writer.Dwriter.AddFiles(files)
+			if errFiles != nil {
+				t.Errorf("Error adding files: %v", errFiles)
+			}
+			// Write
+			result, err := writer.Dwriter.Write(runtime.NumCPU())
+			if err != nil {
+				t.Errorf("Write returned error: %v", err)
+			}
+
+			if result == nil {
+				t.Error("Write returned nil results")
+			}
+			if result.Failure != 0 {
+				t.Errorf("Expected 0 failures, got %d", result.Failure)
+			}
+			if result.SuccessRate != 1.0 {
+				t.Errorf("Expected success rate of 1.0, got %f", result.SuccessRate)
+			}
+
+			// Close connections
+			err = writer.Dwriter.CloseAllConns()
+			if err != nil {
+				t.Errorf("Error closing connections: %v", err)
+			}
 			cleanupFiles(files)
 			elapsed := time.Since(start)
 			t.Logf("Elapsed time: %.3fs for %d writes", elapsed.Seconds(), size)
-			writer.Dwriter.CloseAllConns()
-			t.Log("Closed all connections")
 		})
 	}
 }

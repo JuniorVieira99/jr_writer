@@ -466,7 +466,7 @@ func NewWriterFromJSON(config []byte) (*Writer, error) {
 	// Convert file paths to *os.File slice
 	files := make([]*os.File, 0, len(jc.Files))
 	for _, path := range jc.Files {
-		file, err := os.OpenFile(path, os.O_CREATE, 0666)
+		file, err := os.CreateTemp("", path)
 		if err != nil {
 			// Close all previously opened files
 			for _, f := range files {
@@ -989,6 +989,9 @@ func (w *Writer) CloseAllConns() error {
 	return nil
 }
 
+// ClearAll clears all the file connections in the openFilesPool and the last used
+// file connections in connLastUsed. It is used to clear the file connections after
+// writing to all files.
 func (w *Writer) ClearAll() {
 	w.mu.Lock()
 	w.openFilesPool = sync.Map{}
@@ -996,6 +999,9 @@ func (w *Writer) ClearAll() {
 	w.mu.Unlock()
 }
 
+// ClearFiles clears the Writer's files slice of pointers to os.File by
+// setting it to a new empty slice. It is used to clear the files slice after
+// writing to all files.
 func (w *Writer) ClearFiles() {
 	w.mu.Lock()
 	emptySlice := make([]*os.File, 0)
@@ -1003,10 +1009,18 @@ func (w *Writer) ClearFiles() {
 	w.mu.Unlock()
 }
 
-func (w *Writer) FactoryReset() {
-	w.CloseAllConns()
+// FactoryReset closes all open file connections and clears the pool, the last used
+// file connections, and the files slice. It is used to reset the Writer to its
+// initial state after writing to all files. It returns an error if closing the
+// open file connections fails.
+func (w *Writer) FactoryReset() error {
+	err := w.CloseAllConns()
+	if err != nil {
+		return err
+	}
 	w.ClearAll()
 	w.ClearFiles()
+	return nil
 }
 
 // retry attempts to execute a given function multiple times, with a specified number of retries
