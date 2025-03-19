@@ -2,11 +2,11 @@ package tests
 
 import (
 	"context"
+	writer "github.com/JuniorVieira99/jr_writer"
 	"os"
 	"strings"
 	"testing"
 	"time"
-	writer "writercomp"
 )
 
 // Fixtures

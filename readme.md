@@ -25,6 +25,7 @@ A high-performance file writing utility for Go applications with support for con
   - [Results](#results)
   - [Logger Methods](#logger-methods)
 - [Performance Considerations](#performance-considerations)
+- [Benchmark Results](#benchmark-results)
 - [Error Handling](#error-handling)
 - [Testing](#testing)
 - [License](#license)
@@ -42,6 +43,8 @@ A high-performance file writing utility for Go applications with support for con
 - **Thread Safety**: Safe for concurrent use with goroutines
 - **Extensive Documentation**: All usable methods are documented for easy reference
 - **Default Writer**: Use the default writer for quick operations
+- **Debug Logging**: Enable verbose logging for debugging
+- **Test Coverage**: Comprehensive unit
 
 ## Installation
 
@@ -57,23 +60,31 @@ package main
 import (
     "fmt"
     "os"
-    writer "jrlogger/logger"
+    writer "github.com/JuniorVieira99/jr_writer"
 )
 
 func main() {
-    // Create temporary files
+    // Create temporary files if necessary
     file1, _ := os.CreateTemp("", "example-*.txt")
     file2, _ := os.CreateTemp("", "example-*.txt")
     files := []*os.File{file1, file2}
 
+    // Or use existing files
+    file1, _ := os.Open("file1.txt")
+    file2, _ := os.Open("file2.txt")
+    files := []*os.File{file1, file2}
+
+    // Message to write
     message := "Hello, World!"
     
     // Use the Default Writer for Simple Operations
-    // Use it with `writer.Dwriter` for convenience
-    writer.Dwriter.SetFiles(files)
-    writer.Dwriter.SetMessage(message)
+    // Get Dwriter with `GetDefaultWriter()`
+    MyWriter := writer.GetDefaultWriter()
+    // Add files
+    MyWriter.SetFiles(files)
+    MyWriter.SetMessage(message)
     // Write to all files with 4 workers
-    results, err:= writer.Dwriter.Write(4)
+    results, err:= MyWriter.Write(4)
     
     if err != nil {
         fmt.Printf("Error: %v\n", err)
@@ -81,6 +92,13 @@ func main() {
     }
     // Check Results
     results.Print()
+
+    // Close all connections in the pool
+    err := MyWriter.CloseAllConns()
+    if err != nil {
+        fmt.Printf("Error: %v\n", err)
+        return
+    }
 }
 ```
 
@@ -90,8 +108,18 @@ func main() {
 
 ```go
 
+// Create mode
+mode := writer.NewMode('a') // Append mode
+
 // Create a new Writer
-myWriter := writer.NewWriter(files, mode, message, 10, 3, 100)
+myWriter := writer.NewWriter(
+    files,      // List of files to write to | *[]*os.File
+    mode,       // Writing mode (append or write/truncate) | Mode
+    message,    // Message to write to files | string
+    10,         // Maximum connection pool size | uint64
+    3,          // Number of retries on failure | uint64
+    100         // Exponential backoff factor in milliseconds | uint64
+)
 
 // Write to all files with 4 workers
 results, err := myWriter.Write(4)
@@ -353,6 +381,13 @@ writer.SetDebugMode(true)
 - **Worker Pool Size**: For optimal performance, set the worker pool size to match your system's CPU count
 - **Connection Pool Size**: Adjust the connection pool size based on the number of files you're writing to
 - **Batching**: For very large file sets (>1000 files), the writer automatically uses batching
+- **Timeouts**: Use timeouts for long-running operations to prevent blocking
+- **Cancellations**: Cancel operations when they're no longer needed to free up resources
+- **Error Handling**: Check the results for errors and retry failed writes if necessary
+
+## Benchmark Results
+
+The Benchmark Doc with results is in the `docs` folder.
 
 ## Error Handling
 
@@ -364,10 +399,23 @@ The Writer provides comprehensive error information:
 
 ## Testing
 
-Run the tests using the following command in the test directory:
+Run the **unit tests** with the following command:
 
 ```bash
-go test -v
+go test -v ./tests
+```
+
+Run the **benchmark tests** with the following command:
+
+```bash
+go test -bench=. -benchmem ./tests
+```
+
+Run the **race and coverage** tests with the following command:
+
+```bash
+go test -race ./tests
+go test -cover ./tests
 ```
 
 ## License
